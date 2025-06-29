@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Car Auction Tracker</title>
+  <title>Al Qaryah Auction Tracker</title>
   <style>
     body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 2em; }
     h1 { color: #333; }
@@ -11,7 +11,7 @@
     th, td { padding: 12px; border: 1px solid #ccc; text-align: left; }
     th { background-color: #eee; }
     .container { max-width: 1000px; margin: auto; }
-    .source-link { color: blue; text-decoration: underline; }
+    .car-img { max-width: 100px; border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -20,11 +20,15 @@
     <table id="car-table">
       <thead>
         <tr>
+          <th>Image</th>
           <th>Make</th>
           <th>Model</th>
           <th>Year</th>
-          <th>Damage</th>
-          <th>Link</th>
+          <th>Color</th>
+          <th>Body</th>
+          <th>Engine</th>
+          <th>KM</th>
+          <th>Starting Bid (AED)</th>
         </tr>
       </thead>
       <tbody>
@@ -34,28 +38,32 @@
   </div>
 
   <script>
-    // Replace with your public Google Sheets JSON endpoint or Apify API URL
-    const DATA_URL = 'https://opensheet.elk.sh/16boyYVpssWWctDa8w2jAmfFHeRXKu6Xm9sIrZMvGcdc/Sheet1';
+    const DATA_URL = 'https://erpapi.alqaryahauction.com/api/public/car-list';
 
     async function loadCarData() {
       try {
         const response = await fetch(DATA_URL);
-        const cars = await response.json();
+        const data = await response.json();
 
+        if (!data.status || !data.result) throw new Error("Invalid response format");
+
+        const cars = data.result;
         const tbody = document.querySelector("#car-table tbody");
         tbody.innerHTML = "";
 
         cars.forEach(car => {
           const row = document.createElement("tr");
-
           row.innerHTML = `
-            <td>${car.make || ''}</td>
-            <td>${car.model || ''}</td>
-            <td>${car.year || ''}</td>
-            <td>${car.damage || ''}</td>
-            <td><a href="${car.link}" target="_blank" class="source-link">View</a></td>
+            <td><img src="${car.singleImages}" class="car-img" /></td>
+            <td>${car.make}</td>
+            <td>${car.model}</td>
+            <td>${car.year}</td>
+            <td>${car.color || ''}</td>
+            <td>${car.bodys || ''}</td>
+            <td>${car.engines || ''}</td>
+            <td>${car.milage >= 0 ? car.milage + ' km' : '—'}</td>
+            <td>${car.startingBid || ''}</td>
           `;
-
           tbody.appendChild(row);
         });
       } catch (err) {
